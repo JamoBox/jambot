@@ -1,0 +1,2 @@
+# jambot
+IRC Bot
