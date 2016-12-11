@@ -1,14 +1,19 @@
 #!/usr/bin/env python
 
 from sys import exit
-from config.config import config
-import lib.bot as bot
+from config.irc_config import IrcConfig
+from lib.bot import Bot
 
-# Twitch Plays
-# Inpsired by http://twitch.tv/twitchplayspokemon
-# Written by Aidan Thomson - <aidraj0 at gmail dot com>
 
-try:
-    bot.Bot().run()
-except KeyboardInterrupt:
-    exit()
+def start_application():
+    try:
+        config = IrcConfig()
+        bot = Bot(config)
+        bot.run()
+    except KeyboardInterrupt:
+        exit()
+
+
+
+if __name__ == '__main__':
+    start_application()

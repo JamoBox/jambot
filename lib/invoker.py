@@ -7,12 +7,15 @@ class Invoker(object):
         self.bot = bot
         self.irc = bot.irc
 
-    def register(self, command, command_handler):
-        self.commands[command] = command_handler
+    def register(self, command_handler):
+        # TODO: register properly
+        pass
 
     def has(self, command):
         # Check command list by both command name and command handler
-        return command in self.commands.keys() or command in self.commands.values()
+        has_command = (command in self.commands.keys() or
+                       command in self.commands.values())
+        return has_command
 
     def list_commands(self):
         self.irc.msg_channel('Commands: {}'.format(self.commands.keys()))

@@ -4,16 +4,15 @@ import re
 import time
 
 from lib.misc import pp, pbot
+from lib.base import JamBase
 
 
-class Irc:
+class IrcServer(JamBase):
 
     socket_retry_count = 0
 
     def __init__(self, config):
         self.config = config
-        self.channel = self.config.irc.channel
-        self.connect()
 
     def connect(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -52,19 +51,9 @@ class Irc:
         else:
             pp('Login successful!')
 
-        sock.send('JOIN #%s\r\n' % self.channel)
-        pp('Joined #%s' % self.channel)
-
     def ping(self, data):
         if data.startswith('PING'):
             self.sock.send(data.replace('PING', 'PONG'))
-
-    def send_raw(self, message):
-        time.sleep(1)
-        self.sock.send('{0}\r\n'.format(message))
-
-    def msg_channel(self, message):
-        self.send_raw('PRIVMSG #{0} :{1}'.format(self.channel, message))
 
     def recv(self, amount=1024):
         return self.sock.recv(amount)
@@ -92,10 +81,3 @@ class Irc:
     def check_has_message(self, data):
         #FIXME: remove twitch stuff
         return re.match(r'^:[a-zA-Z0-9_]+\![a-zA-Z0-9_]+@[a-zA-Z0-9_]+(\.tmi\.twitch\.tv|\.testserver\.local) PRIVMSG #[a-zA-Z0-9_]+ :.+$', data)
-
-    def parse_message(self, data):
-        return {
-            'channel': re.findall(r'^:.+\![a-zA-Z0-9_]+@[a-zA-Z0-9_]+.+ PRIVMSG (.*?) :', data)[0],
-            'username': re.findall(r'^:([a-zA-Z0-9_]+)\!', data)[0].lower(),
-            'message': re.findall(r'PRIVMSG #[a-zA-Z0-9_]+ :(.+)', data)[0].decode('utf8')
-        }

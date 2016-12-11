@@ -1,5 +1,5 @@
 from lib.command import Command
-from config.config import config
+from config.irc_config import IrcConfig
 
 class GoalCommand(Command):
 
@@ -7,9 +7,9 @@ class GoalCommand(Command):
         self._irc = bot.irc
         self._invoker = bot.invoker
         self.goal = ''
-        self._goal_file = config['goal']
+        self._goal_file = config.goal
         self.load_goal()
-        self._ops = config['ops']
+        self._ops = config.ops
 
     def save_goal(self):
         fd = open(self._goal_file, 'w+')
