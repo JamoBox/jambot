@@ -9,41 +9,51 @@ from lib.base import JamBase
 
 class IrcServer(JamBase):
 
-    socket_retry_count = 0
+    connection_retry_count = 0
 
-    def __init__(self, config):
-        self.config = config
+    def __init__(self, name, address, port, max_reconnects=2):
+        self.name = name
+        self.address = address
+        self.port = port
+        self.max_reconnects = max_reconnects
+        self._connection = None
 
-    def connect(self):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock = sock
+        #TODO: Change this
+        self.config = None
 
-        sock.settimeout(10)
+    def _send_raw(self, raw_message):
+        self._connection.send(raw_message)
+
+    def send(self, message):
+        msg = message.replace('\r\n', '  ')
+        self._send_raw('{0}\r\n'.format(msg))
+
+    def connect(self, timeout=10):
+        self._connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        self._connection.settimeout(timeout)
 
         username = self.config.account.username.lower()
         password = self.config.account.password
 
-        server = self.config.irc.server
-        port = self.config.irc.port
-
         try:
-            sock.connect((server, port))
+            self._connection.connect((self.address, self.port))
         except:
-            pp('Error connecting to IRC server. ({0}:{1}) ({2})'
-               .format(server, port, self.socket_retry_count + 1),
-               'error')
+            # pp('Error connecting to IRC server. ({0}:{1}) ({2})'
+            #    .format(server, port, self.connection_retry_count + 1),
+            #    'error')
 
-            if self.socket_retry_count < 2:
-                self.socket_retry_count += 1
+            if self.connection_retry_count < self.max_reconnects:
+                self.connection_retry_count += 1
                 return self.connect()
             else:
                 sys.exit()
 
-        sock.settimeout(None)
+        self._connection.settimeout(None)
 
-        sock.send('USER %s\r\n' % username)
-        sock.send('PASS %s\r\n' % password)
-        sock.send('NICK %s\r\n' % username)
+        self._connection.send('USER {0}'.format(username))
+        self._connection.send('PASS {0}'.format(password))
+        self._connection.send('NICK {0}'.format(username))
 
         if not self.check_login_status(self.recv()):
             pp('Invalid login.', 'error')
@@ -53,10 +63,10 @@ class IrcServer(JamBase):
 
     def ping(self, data):
         if data.startswith('PING'):
-            self.sock.send(data.replace('PING', 'PONG'))
+            self._connection.send(data.replace('PING', 'PONG'))
 
     def recv(self, amount=1024):
-        return self.sock.recv(amount)
+        return self._connection.recv(amount)
 
     def recv_messages(self, amount=1024):
         messages = []
