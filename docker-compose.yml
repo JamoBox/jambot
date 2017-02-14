@@ -1,0 +1,5 @@
+jambot:
+  priviledged: True
+  build: .
+  volumes:
+    - .:/opt/jambot

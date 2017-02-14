@@ -24,11 +24,11 @@ class GoalCommand(Command):
         fd.close()
         return self.goal
 
-    def execute(self, user, params):
-        if params:
+    def execute(self, user, args):
+        if args:
             if user in self._ops:
                 self.goal = ''
-                for word in params:
+                for word in args:
                     self.goal += '{} '.format(word)
                 self.save_goal()
         self._irc.msg_channel('Current goal: {}'.format(self.goal))

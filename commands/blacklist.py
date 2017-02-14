@@ -57,13 +57,13 @@ class BlacklistCommand(Command):
     def list(self):
         self._irc.msg_channel('Blacklist: {}'.format(self.blacklist))
 
-    def execute(self, user, params):
-        if params:
-            cmd = params[0]
+    def execute(self, user, *args):
+        if args:
+            cmd = args[0]
             if cmd == 'add':
-                self.add(params[1:])
+                self.add(args[1:])
             elif cmd == 'remove':
-                self.remove(params[1:])
+                self.remove(args[1:])
             elif cmd == 'list':
                 self.list()
             elif cmd == 'clear':

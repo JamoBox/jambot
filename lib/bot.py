@@ -1,6 +1,6 @@
 import importlib
-from lib.irc import Irc
-from lib.invoker import Invoker
+from .irc import Irc
+from .invoker import Invoker
 
 
 class Bot:
